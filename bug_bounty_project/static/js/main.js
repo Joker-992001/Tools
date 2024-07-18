@@ -2,15 +2,15 @@
 console.log("Bug Bounty Tools website is running.");
 
 // Subdomain Enum part
-
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('subdomain-form');
     const resultsDiv = document.getElementById('results');
     const subdomainList = document.getElementById('subdomain-list');
     const backButton = document.getElementById('backButton');
+    const homeLink = document.getElementById('homeLink');
 
     form.addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault();  // Prevent default form submission
         const domain = document.getElementById('domain').value;
         fetchSubdomains(domain);
     });
@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
     backButton.addEventListener('click', function() {
         resultsDiv.classList.add('hidden');
         form.classList.remove('hidden');
+    });
+
+    homeLink.addEventListener('click', function(event) {
+        event.preventDefault();  // Prevent default link behavior
+        window.location.href = '/index.html';  // Navigate to home page
     });
 
     function fetchSubdomains(domain) {
