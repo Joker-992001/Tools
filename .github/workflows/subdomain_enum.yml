@@ -1,0 +1,31 @@
+name: Subdomain Enumeration
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'Domain to enumerate subdomains for'
+        required: true
+        type: string
+
+jobs:
+  subdomain-enumeration:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Run subdomain enumeration
+      run: |
+        echo "Enumerating subdomains for ${{ github.event.inputs.domain }}"
+        subfinder -d ${{ github.event.inputs.domain }} -o alive_subdomains.txt
+
+    - name: Commit results
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        mv alive_subdomains.txt public/results/alive_subdomains.txt
+        git add public/results/alive_subdomains.txt
+        git commit -m "Add subdomain enumeration results for ${{ github.event.inputs.domain }}"
+        git push
