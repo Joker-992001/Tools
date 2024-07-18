@@ -16,16 +16,45 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.16'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip unzip
+        pip3 install -r requirements.txt
+
+    - name: Install Sublist3r, subfinder, and httpx
+      run: |
+        curl -s https://api.github.com/repos/aboul3la/Sublist3r/releases/latest | grep "browser_download_url.*tar.gz" | cut -d : -f 2,3 | tr -d \" | wget -qi -
+        tar -xzf Sublist3r*.tar.gz
+        cd Sublist3r*/
+        sudo pip install -r requirements.txt
+        cd ..
+        git clone https://github.com/projectdiscovery/subfinder.git
+        cd subfinder
+        go build -o subfinder main.go
+        sudo mv subfinder /usr/local/bin/
+        cd ..
+        git clone https://github.com/projectdiscovery/httpx.git
+        cd httpx/cmd/httpx
+        go build -o httpx main.go
+        sudo mv httpx /usr/local/bin/
+        cd ../../../
+        
     - name: Run subdomain enumeration
       run: |
-        echo "Enumerating subdomains for ${{ github.event.inputs.domain }}"
-        subfinder -d ${{ github.event.inputs.domain }} -o alive_subdomains.txt
+        ./bug_bounty_project/scripts/subdomain_enum.sh ${{ github.event.inputs.domain }}
 
     - name: Commit results
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
-        mv alive_subdomains.txt public/results/alive_subdomains.txt
-        git add public/results/alive_subdomains.txt
+        git add output/alive_subdomains.txt
         git commit -m "Add subdomain enumeration results for ${{ github.event.inputs.domain }}"
         git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
