@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subdomain Finder</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <h1>Subdomain Finder</h1>
+    <form id="subdomain-form" method="POST" action="https://github.com/<username>/<repo>/actions/workflows/subdomain_enum.yml">
+        <label for="domain">Domain:</label>
+        <input type="text" id="domain" name="domain" required>
+        <button type="submit">Find Subdomains</button>
+    </form>
+    <div id="results"></div>
+    <a href="/">Back to Home</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('results/alive_subdomains.txt')
+                .then(response => response.text())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    if (data) {
+                        const subdomains = data.split('\n');
+                        let resultsList = '<ul>';
+                        subdomains.forEach(subdomain => {
+                            if (subdomain) {
+                                resultsList += `<li>${subdomain}</li>`;
+                            }
+                        });
+                        resultsList += '</ul>';
+                        resultsDiv.innerHTML = resultsList;
+                    }
+                });
+        });
+    </script>
+</body>
+</html>
