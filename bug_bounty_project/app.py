@@ -1,4 +1,10 @@
+import os
+import requests
+import time
 from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -28,33 +34,33 @@ def http_request_analyzer():
 
 @app.route('/api/subdomain_finder', methods=['POST'])
 def api_subdomain_finder():
-    input_data = request.form.get('input')
-    result = {"message": f"Subdomain finder for {input_data}"}
-    return jsonify(result)
-
-@app.route('/api/directory_scanner', methods=['POST'])
-def api_directory_scanner():
-    input_data = request.form.get('input')
-    result = {"message": f"Directory scanner for {input_data}"}
-    return jsonify(result)
-
-@app.route('/api/port_scanner', methods=['POST'])
-def api_port_scanner():
-    input_data = request.form.get('input')
-    result = {"message": f"Port scanner for {input_data}"}
-    return jsonify(result)
-
-@app.route('/api/vulnerability_scanner', methods=['POST'])
-def api_vulnerability_scanner():
-    input_data = request.form.get('input')
-    result = {"message": f"Vulnerability scanner for {input_data}"}
-    return jsonify(result)
-
-@app.route('/api/http_request_analyzer', methods=['POST'])
-def api_http_request_analyzer():
-    input_data = request.form.get('input')
-    result = {"message": f"HTTP request analyzer for {input_data}"}
-    return jsonify(result)
+    input_data = request.json.get('domain')
+    github_token = os.getenv('GITHUB_TOKEN')
+    headers = {
+        'Authorization': f'token {github_token}',
+        'Accept': 'application/vnd.github.v3+json',
+    }
+    workflow_url = 'https://api.github.com/repos/Joker-992001/Tools/actions/workflows/subdomain_enum.yml/dispatches'
+    data = {
+        "ref": "main",
+        "inputs": {
+            "domain": input_data
+        }
+    }
+    
+    response = requests.post(workflow_url, json=data, headers=headers)
+    
+    if response.status_code == 204:
+        time.sleep(10)  # Wait for the workflow to complete
+        results_url = 'https://raw.githubusercontent.com/Joker-992001/Tools/main/public/results/alive_subdomains.txt'
+        results_response = requests.get(results_url)
+        if results_response.status_code == 200:
+            results = results_response.text
+            return jsonify({"message": f"Subdomain enumeration results for {input_data}", "results": results})
+        else:
+            return jsonify({"message": "Failed to fetch results"}), 500
+    else:
+        return jsonify({"message": "Failed to trigger workflow"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
