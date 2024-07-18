@@ -1,7 +1,7 @@
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 import requests
 import time
-from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -61,6 +61,10 @@ def api_subdomain_finder():
             return jsonify({"message": "Failed to fetch results"}), 500
     else:
         return jsonify({"message": "Failed to trigger workflow"}), 500
+
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 if __name__ == '__main__':
     app.run(debug=True)
