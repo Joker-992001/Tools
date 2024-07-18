@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subdomain Finder</title>
     <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <h1>Subdomain Finder</h1>
@@ -13,28 +18,13 @@
         <input type="text" id="domain" name="domain" required>
         <button type="submit">Find Subdomains</button>
     </form>
-    <div id="results"></div>
+    <div id="results" class="hidden">
+        <h2>Subdomain Results</h2>
+        <ul id="subdomain-list"></ul>
+        <button id="backButton">Back</button>
+    </div>
     <a href="/">Back to Home</a>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('results/alive_subdomains.txt')
-                .then(response => response.text())
-                .then(data => {
-                    const resultsDiv = document.getElementById('results');
-                    if (data) {
-                        const subdomains = data.split('\n');
-                        let resultsList = '<ul>';
-                        subdomains.forEach(subdomain => {
-                            if (subdomain) {
-                                resultsList += `<li>${subdomain}</li>`;
-                            }
-                        });
-                        resultsList += '</ul>';
-                        resultsDiv.innerHTML = resultsList;
-                    }
-                });
-        });
-    </script>
+    <script src="static/js/main.js"></script>
 </body>
 </html>
